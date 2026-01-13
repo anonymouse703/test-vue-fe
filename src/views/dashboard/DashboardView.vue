@@ -9,6 +9,7 @@ import type { BookingStatus } from '@/composables/useBooking'
 import type { AxiosError } from 'axios'
 import { useRouter } from 'vue-router'
 import type { Booking, ApiResponse } from '@/types/booking'
+import { useAuthStore } from '@/stores/auth'
 
 const bookings = ref<Booking[]>([])
 const currentPage = ref<number>(1)
@@ -17,16 +18,12 @@ const isLoading = ref(false)
 
 const toast = useToast()
 const router = useRouter()
+const authStore = useAuthStore()
 
 const handleCreateBooking = () => router.push({ name: 'CreateBooking' })
-const handleLogout = () => toast.success('Logged out successfully')
 const handleEditBooking = (booking: Booking) => router.push(`/bookings/${booking.id}/edit`)
-const handleViewBooking = (booking: Booking) =>
-    toast.info(`Viewing: ${booking.service?.name ?? booking.service_id}`)
+const handleViewBooking = (booking: Booking) => toast.info(`Viewing: ${booking.service?.name ?? booking.service_id}`)
 
-// ------------------
-// Fetch bookings
-// ------------------
 const fetchBookings = async (page = 1) => {
     try {
         isLoading.value = true
@@ -63,9 +60,6 @@ const fetchBookings = async (page = 1) => {
     }
 }
 
-// ------------------
-// Event handlers
-// ------------------
 const handlePageChange = (page: number) => fetchBookings(page)
 
 const handleCancelBooking = async (updatedBooking: Booking) => {
@@ -77,6 +71,20 @@ const handleRefundBooking = async (updatedBooking: Booking) => {
     toast.success(`Refund requested for booking ${updatedBooking.service?.name}`)
     await fetchBookings(currentPage.value)
 }
+
+const handleLogout = async () => {
+    try {
+        await api.post('/api/auth/logout')
+    } catch (e: unknown) {
+        const error = e as AxiosError<{ message?: string }>
+        console.error('Logout API failed:', error.response?.data ?? error)
+    } finally {
+        authStore.clearToken()
+        toast.success('Logged out successfully')
+        router.replace('/login')
+    }
+}
+
 
 onMounted(() => fetchBookings(currentPage.value))
 </script>

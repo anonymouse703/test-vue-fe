@@ -46,7 +46,6 @@ const handleLogin = async () => {
         })
 
         const data = response.data
-        console.log('Login response:', data)
 
         authStore.setToken(data.data.token)
         localStorage.setItem('user', JSON.stringify(data.data.user))

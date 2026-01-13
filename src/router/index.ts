@@ -5,7 +5,7 @@ import { useAuthStore } from '@/stores/auth'
 const routes = [
   {
     path: '/login',
-    name: 'login', // lowercase to avoid mismatch
+    name: 'login',
     component: () => import('../views/auth/LoginView.vue'),
     meta: { requiresAuth: false }
   },
